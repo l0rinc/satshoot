@@ -1,24 +1,62 @@
 # SatShoot
-A freelance app for freedom-lovers, using nostr
 
-Try it live on:
-```
-https://satshoot.com
-```
+Nostr-native freelancing marketplace (PWA): post jobs, offer services, chat, pay in sats, and build a portable reputation.
 
-## Benefits
-- No middle-man: Your nostr keys, your contacts, your deals
-- Your servers: Respects your relays of choice (see [outbox model](https://nostr-nips.com/nip-65))
-- Web of Trust(WoT): Uses Your nostr-based social network to fight scammers and spammers
-- Build an unstoppable Reputation on nostr as a freelancer
+- Live: https://satshoot.com
 
-## Typical Flow
-- Clients post any kind of job or problem. This is basically a Request For Quote (RFQ)
-- Freelancers bid on Jobs with Offers to resolve the problem for sats. It can be an absolute or a time-based price
-- Clients select the most attractive Offer: Price and Reputation of the bidder matter most
-- If an Offer is accepted the Work can begin via any means of communication, defaulting to nostr DM-s (nip04)
-- You can pay any time after agreement and review each other
-- You build Reputation by earning / paying for services with public zaps on nostr and by receiving public reviews
-- You can post on your nostr feed to share Jobs and promote your services
+## What it does
 
-- Built with [Nostr Development Kit](https://github.com/nostr-dev-kit/ndk) by @[pablof7z](https://github.com/pablof7z)
+- **Jobs & bidding**: clients post jobs (RFQs), freelancers bid with fixed or time-based offers.
+- **Services & orders**: freelancers list services; clients can place orders.
+- **Chat & notifications**: Nostr DMs + a service worker for notifications.
+- **Payments**: Lightning zaps (NIP-57) and Cashu ecash wallets (NIP-60 / nutzaps); optional Nostr Wallet Connect (NIP-47).
+- **Anti-spam**: relay selection + outbox model (NIP-65) and Web-of-Trust oriented UX.
+
+## Protocol / event kinds
+
+SatShoot models freelancing primitives as custom Nostr event kinds:
+
+- `32765` Freelance Service
+- `32766` Freelance Order
+- `32767` Freelance Job
+- `32768` Freelance Bid
+- `1986` Review
+- `967` Kind-scoped follow
+
+See `EVENT_STRUCTURE.md` for the full tag/content schemas.
+
+## Tech stack
+
+- `apps/satshoot`: SvelteKit (static adapter) + Vite + TypeScript + Tailwind/Skeleton
+- Nostr client: `@nostr-dev-kit/ndk` (+ `ndk-svelte` helpers)
+- Wallet toolkit (vendored): `packages/ndk-wallet` (git submodule, used via workspace dependency)
+
+## Development
+
+1. Clone with submodules:
+   - `git clone --recurse-submodules <repo-url>`
+1. Enable the repo-pinned `pnpm` (recommended):
+   - `corepack enable && corepack prepare pnpm@9.7.0 --activate`
+1. Install dependencies:
+   - `pnpm i`
+1. Run the app:
+   - `pnpm dev`
+
+Useful scripts from the repo root:
+
+- Build: `pnpm build` (builds `packages/ndk-wallet` first, then Turbo build)
+- Preview: `pnpm preview`
+- Tests: `pnpm -r test`
+- Clean reinstall: `just renew`
+
+If you use Nix, a devshell is provided via `flake.nix`:
+
+- `nix develop`
+
+## Contributing
+
+See `CONTRIBUTE.md` and `CHANGELOG.md`.
+
+## License
+
+MIT (see `apps/satshoot/LICENSE`; `packages/ndk-wallet` declares MIT in `packages/ndk-wallet/package.json`).

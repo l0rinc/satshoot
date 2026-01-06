@@ -1,59 +1,92 @@
-# How to Get SatShoot Working as a Monorepo
+# Contributing
 
-1. **Clone the Repository**
-   Clone monorepo with ndk-wallet as a git submodule initialized:
-    1. ```bash
-        git clone --recurse-submodules https://github.com/Pleb5/satshoot.git
-   ```
-    2. If you already cloned the repo without the submodule then init manually:
-      ```bash
-        git submodule update --init --recursive
-        ```
+## Development setup
 
-2. **Install Required Global Tools**
-   You will need to install a few global tools.
-   If you're using NixOS, you can install them with a Nix devshell:
+SatShoot is a `pnpm` + Turborepo monorepo. It includes `packages/ndk-wallet` as a git submodule.
 
-   - [pnpm](https://pnpm.io/)
-   - [Turbo Repo](https://turbo.build/repo)
-   - [Just](https://github.com/casey/just)
+### Prerequisites
 
-   Alternatively, you can install them using `npm` or your preferred package manager:
+- Node.js (recommended: current LTS)
+- `corepack` (bundled with Node) for managing the pinned `pnpm` version
+- Optional: `just` (quality-of-life scripts)
+- Optional: Nix devshell (`flake.nix`)
 
-   ```bash
-   npm install -g pnpm turbo just
-   ```
+### Clone
 
-3. **Install Dependencies**
-   Go to the directory where you cloned SatShoot and install all dependencies recursively:
+Clone with submodules:
 
-   ```bash
-   pnpm i
-   ```
+```bash
+git clone --recurse-submodules https://github.com/Pleb5/satshoot.git
+cd satshoot
+```
 
-4. **Start the Development Server**
-   In the root of the project, start the dev server:
+If you already cloned without submodules:
 
-   ```bash
-   pnpm run dev
-   ```
+```bash
+git submodule update --init --recursive
+```
 
-5. **Clean and Rebuild SatShoot**
-   To perform a clean build of SatShoot, run:
+### Install dependencies
 
-   ```bash
-   just renew
-   ```
+Use the repo-pinned `pnpm` via Corepack:
 
-6. If you change anything in ndk-wallet to test out, you should restart the vite dev server
-7. If you want to pull in changes from the original ndk-wallet repo you should set up a second remote with the right url:
-    1. ```bash
-       git remote add original_ndk https://github.com/rodant/ndk-wallet.git
-        ```
-    2. Make sure to fetch and merge from the original remote and push to a fork
-8. Clean build satshoot along with ndk-wallet(can break project in certain cases! Thanks semver..):
-    1. inspect justfile and [understand](https://github.com/casey/just) what it does
-    2. navigate to satshoot root folder
-    3.  ```bash
-        just renew
-        ```
+```bash
+corepack enable
+corepack prepare pnpm@9.7.0 --activate
+pnpm i
+```
+
+### Run the app
+
+From the repo root:
+
+```bash
+pnpm dev
+```
+
+### Build
+
+Builds `packages/ndk-wallet` first (via `./ndk_compile.sh`), then runs the Turbo build:
+
+```bash
+pnpm build
+```
+
+### Tests
+
+Run all workspace tests:
+
+```bash
+pnpm -r test
+```
+
+Or run per-package:
+
+```bash
+pnpm -C apps/satshoot test
+pnpm -C packages/ndk-wallet test
+```
+
+### Nix
+
+If you use Nix:
+
+```bash
+nix develop
+```
+
+### Troubleshooting
+
+- If you change files under `packages/ndk-wallet`, restart the dev server.
+- If `packages/ndk-wallet` is missing or empty, re-run `git submodule update --init --recursive`.
+- Clean reinstall (requires `just`): `just renew`.
+
+### Working with the upstream `ndk-wallet`
+
+If you want to pull in changes from upstream, add a second remote inside the submodule:
+
+```bash
+cd packages/ndk-wallet
+git remote add upstream https://github.com/rodant/ndk-wallet.git
+git fetch upstream
+```
